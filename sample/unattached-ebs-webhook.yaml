@@ -1,0 +1,26 @@
+policies:
+  - name: ebs-unattached-list
+    resource: ebs
+    comments: |
+      List any unattached EBS volumes, along with their CreateTime and owner tag value, 
+      and send the details via a webhook.
+    filters:
+      - Attachments: []
+    actions:
+      - type: webhook
+        url: https://app.harness.io/gateway/pipeline/api/webhook/custom/XoJkJKTuQ7qM8Qt4vzxVJA/v3?accountIdentifier=Ompd5rAMSfq97LoZsErwnQ&orgIdentifier=default&projectIdentifier=samiacmtest&pipelineIdentifier=governancemail_backup&triggerIdentifier=trigger
+        batch: true
+        method: POST
+        body: |
+          {
+            "volumes": [
+              resources[].{
+                VolumeId: VolumeId,
+                CreateTime: CreateTime,
+                Owner: Tags[?Key=='owner'].Value | [0]
+              }
+            ]
+          }
+        headers:
+          account-id: account_id
+          region: region
